@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Class Planner</string>
+    <string name="action_settings">Settings</string>
+    <string name="uptodate">Up-to-date</string>
+    <string name="group_name">Nome</string>
+    <string name="group_time">Horário (HH:MM)</string>
+    <string name="group_start_date">Data de início (DD/MM/AAAA)</string>
+    <string name="group_class_count">Número de aulas</string>
+    <string name="new_group">Criar turma</string>
+    <string name="class_planned">Aula planejada</string>
+    <string name="material_sent">Material enviado</string>
+    <string name="attendance_taken">Chamada feita</string>
+    <string name="resource_name">Nome</string>
+    <string name="resource_url">URL</string>
+    <string name="apply_resource_globally">Aplicar a todas as aulas</string>
+</resources>

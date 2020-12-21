@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "870973463747",
+    "project_id": "class-planner-5ccb7",
+    "storage_bucket": "class-planner-5ccb7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870973463747:android:486bc66569803b86f45676",
+        "android_client_info": {
+          "package_name": "br.edu.ifrs.classplanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "870973463747-oaca2nh5uqaoimfj5p3m8df2hac8fpds.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.edu.ifrs.classplanner",
+            "certificate_hash": "4fbb1f4d64b5899f0cf26a5b9e85dc8bdf32c78e"
+          }
+        },
+        {
+          "client_id": "870973463747-krihhllhf4q5ni82ibl4pd0268tja5gu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs9MJl9qywnpw5UNU1J-xTgKd8K2KQYjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "870973463747-krihhllhf4q5ni82ibl4pd0268tja5gu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

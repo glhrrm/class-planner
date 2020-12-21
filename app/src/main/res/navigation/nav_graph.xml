@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/GroupListFragment">
+
+    <fragment
+        android:id="@+id/GroupListFragment"
+        android:name="br.edu.ifrs.classplanner.fragment.GroupListFragment"
+        android:label="fragment_group_list"
+        tools:layout="@layout/fragment_group_list">
+
+        <action
+            android:id="@+id/action_GroupListFragment_to_NewGroupFragment"
+            app:destination="@id/NewGroupFragment" />
+        <action
+            android:id="@+id/action_GroupListFragment_to_ClassListFragment"
+            app:destination="@id/ClassListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/NewGroupFragment"
+        android:name="br.edu.ifrs.classplanner.fragment.NewGroupFragment"
+        android:label="fragment_new_group"
+        tools:layout="@layout/fragment_new_group">
+
+        <action
+            android:id="@+id/action_NewGroupFragment_to_GroupListFragment"
+            app:destination="@id/GroupListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/ClassListFragment"
+        android:name="br.edu.ifrs.classplanner.fragment.ClassListFragment"
+        android:label="fragment_class_list"
+        tools:layout="@layout/fragment_class_list" >
+        <action
+            android:id="@+id/action_ClassListFragment_to_GroupListFragment"
+            app:destination="@id/GroupListFragment" />
+    </fragment>
+</navigation>
