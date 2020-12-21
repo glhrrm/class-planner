@@ -105,6 +105,7 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:padding="@dimen/main_padding">
 
@@ -113,10 +114,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="4dp"
+                    android:layout_marginEnd="@dimen/main_padding"
+                    android:layout_marginRight="@dimen/main_padding"
                     android:background="@drawable/roundcorner_accent"
                     android:contentDescription="@string/class_planned"
                     android:padding="4dp"
                     android:src="@drawable/ic_add" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupResources"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                </com.google.android.material.chip.ChipGroup>
 
             </LinearLayout>
 

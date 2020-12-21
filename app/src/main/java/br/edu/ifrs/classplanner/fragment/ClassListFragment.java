@@ -1,11 +1,13 @@
 package br.edu.ifrs.classplanner.fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,9 +28,6 @@ import br.edu.ifrs.classplanner.model.Group;
 
 public class ClassListFragment extends Fragment {
 
-    private RecyclerView recyclerClasses;
-    private List<Class> classList;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -38,29 +37,31 @@ public class ClassListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerClasses = getActivity().findViewById(R.id.recyclerClasses);
-
         Group group = (Group) getArguments().getSerializable("group");
 
         getActivity().setTitle(group.getName());
 
-        FirebaseDatabase firebase = FirebaseDatabase.getInstance();
-        DatabaseReference groupReference = firebase.getReference("group").child(group.getId()).child("classes");
-        groupReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        RecyclerView recyclerClasses = getActivity().findViewById(R.id.recyclerClasses);
+
+        DatabaseReference classReference = FirebaseDatabase.getInstance().getReference("classes");
+        classReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                classList = new ArrayList<>();
+                List<Class> classList = new ArrayList<>();
 
                 ClassAdapter classAdapter = new ClassAdapter(classList, group, getActivity());
                 RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
                 recyclerClasses.setLayoutManager(layoutManager);
                 recyclerClasses.setHasFixedSize(true);
 
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                snapshot.getChildren().forEach(dataSnapshot -> {
                     Class aClass = dataSnapshot.getValue(Class.class);
-                    aClass.setId(dataSnapshot.getKey());
-                    classList.add(aClass);
-                }
+                    if (aClass.getGroupId().equals(group.getId())) {
+                        aClass.setId(dataSnapshot.getKey());
+                        classList.add(aClass);
+                    }
+                });
 
                 recyclerClasses.setAdapter(classAdapter);
             }
