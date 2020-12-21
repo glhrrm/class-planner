@@ -1,5 +1,6 @@
 package br.edu.ifrs.classplanner.fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,6 +39,8 @@ public class GroupListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        RecyclerView recyclerGroups = getActivity().findViewById(R.id.recyclerGroups);
+
         getActivity().setTitle("Turmas");
 
         FloatingActionButton fabCreateGroup = getActivity().findViewById(R.id.fabCreateGroup);
@@ -44,23 +48,23 @@ public class GroupListFragment extends Fragment {
                 .navigate(R.id.action_GroupListFragment_to_NewGroupFragment));
 
         FirebaseDatabase firebase = FirebaseDatabase.getInstance();
-        DatabaseReference groupReference = firebase.getReference("group");
+        DatabaseReference groupReference = firebase.getReference("groups");
         groupReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<Group> groupList = new ArrayList<>();
 
                 GroupAdapter groupAdapter = new GroupAdapter(groupList, getActivity());
                 RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                RecyclerView recyclerGroups = getActivity().findViewById(R.id.recyclerGroups);
                 recyclerGroups.setLayoutManager(layoutManager);
                 recyclerGroups.setHasFixedSize(true);
 
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                snapshot.getChildren().forEach(dataSnapshot -> {
                     Group group = dataSnapshot.getValue(Group.class);
                     group.setId(dataSnapshot.getKey());
                     groupList.add(group);
-                }
+                });
 
                 recyclerGroups.setAdapter(groupAdapter);
 
