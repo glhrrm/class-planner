@@ -20,4 +20,5 @@
     <string name="fill_all_fields">Preencha todos os campos</string>
     <string name="confirm_password">Confirme a senha</string>
     <string name="action_sign_out">Sair</string>
+    <string name="group_day_of_week_and_time">%1$s, %2$s</string>
 </resources>

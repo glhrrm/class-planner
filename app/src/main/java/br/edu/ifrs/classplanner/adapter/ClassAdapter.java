@@ -247,8 +247,8 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
 
     private int getFlagShape(boolean status) {
         return status
-                ? R.drawable.roundcorner_green
-                : R.drawable.roundcorner_red;
+                ? R.drawable.roundcorner_accent
+                : R.drawable.roundcorner_grey;
     }
 
     private void showResultForResources(Task<Void> result, View view) {

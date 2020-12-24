@@ -1,6 +1,7 @@
 package br.edu.ifrs.classplanner.adapter;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,16 +9,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 
 import br.edu.ifrs.classplanner.R;
+import br.edu.ifrs.classplanner.model.Class;
 import br.edu.ifrs.classplanner.model.Group;
+
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder> {
 
@@ -51,34 +63,49 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
         String dayOfWeek = startDate.getDayOfWeek()
                 .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
         String capitalizedDayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
-        myViewHolder.groupDayAndTime.setText(capitalizedDayOfWeek + ", " + group.getTime());
+        myViewHolder.groupDayAndTime.setText(context.getString(R.string.group_day_of_week_and_time, capitalizedDayOfWeek, group.getTime()));
 
-        boolean isUpToDate = true;
-//        TODO: REVISAR
-//        for (Class aClass : group.getClasses()) {
-//            LocalDateTime classDateTime = LocalDateTime.parse(aClass.getDate() + " " + group.getTime(),
-//                    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-//                            .withLocale(new Locale("pt", "BR")));
-//
-//            LocalDateTime now = LocalDateTime.now();
-//
-////          Está na hora da aula e alguma das atividades não foi realizada
-//            if (MINUTES.between(classDateTime, now) >= 0
-//                    && !(aClass.isClassPlanned() && aClass.isMaterialSent() && aClass.isAttendanceTaken())) {
-//                isUpToDate = false;
-//                break;
-////          Faltam 2 dias para a próxima aula e ela ainda não foi planejada
-//            } else if (DAYS.between(now, classDateTime) <= 2 && !aClass.isClassPlanned()) {
-//                isUpToDate = false;
-//                break;
-//            }
-//        }
+        FirebaseDatabase.getInstance().getReference("classes")
+                .addValueEventListener(new ValueEventListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        boolean isUpToDate = true;
 
-        if (isUpToDate) {
-            myViewHolder.flagUpToDate.setImageResource(R.drawable.ic_uptodate);
-        } else {
-            myViewHolder.flagUpToDate.setImageResource(R.drawable.ic_attention);
-        }
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Class aClass = dataSnapshot.getValue(Class.class);
+                            if (aClass.getGroupId().equals(group.getId())) {
+                                LocalDateTime classDateTime = LocalDateTime.parse(aClass.getDate() + " " + group.getTime(),
+                                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                                                .withLocale(new Locale("pt", "BR")));
+
+                                LocalDateTime now = LocalDateTime.now();
+
+//                                Está na hora da aula e alguma das atividades não foi realizada
+                                if (MINUTES.between(classDateTime, now) >= 0
+                                        && !(aClass.isClassPlanned() && aClass.isMaterialSent() && aClass.isAttendanceTaken())) {
+                                    isUpToDate = false;
+                                    break;
+//                                Faltam 2 dias ou menos para a próxima aula e ela ainda não foi planejada
+                                } else if (DAYS.between(now, classDateTime) <= 2 && !aClass.isClassPlanned()) {
+                                    isUpToDate = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (isUpToDate) {
+                            myViewHolder.flagUpToDate.setImageResource(R.drawable.ic_uptodate);
+                        } else {
+                            myViewHolder.flagUpToDate.setImageResource(R.drawable.ic_attention);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     @Override
