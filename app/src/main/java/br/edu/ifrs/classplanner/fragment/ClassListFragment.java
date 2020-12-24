@@ -21,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import br.edu.ifrs.classplanner.R;
 import br.edu.ifrs.classplanner.adapter.ClassAdapter;
@@ -40,7 +41,7 @@ public class ClassListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        layoutProgressBar = getActivity().findViewById(R.id.layoutProgressBar);
+        layoutProgressBar = requireActivity().findViewById(R.id.layoutProgressBar);
         layoutProgressBar.setVisibility(View.VISIBLE);
 
         Group group = (Group) getArguments().getSerializable("group");

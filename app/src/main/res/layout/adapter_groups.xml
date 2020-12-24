@@ -26,6 +26,12 @@
             android:layout_height="wrap_content"
             android:textSize="16sp" />
 
+        <TextView
+            android:id="@+id/groupNextClass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp" />
+
         <ImageView
             android:id="@+id/flagUpToDate"
             android:layout_width="wrap_content"

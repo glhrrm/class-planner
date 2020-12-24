@@ -193,6 +193,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                                         .inflate(R.layout.chip_resource, null);
                                 chipResource.setText(resource.getName());
                                 chipResource.setCheckable(false);
+                                chipResource.setCloseIconVisible(false);
 
                                 chipResource.setOnClickListener(view -> {
                                     ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -200,10 +201,23 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                                     clipboard.setPrimaryClip(clip);
                                 });
 
+                                chipResource.setOnLongClickListener(view -> {
+                                    if (chipResource.isCloseIconVisible()) {
+                                        chipResource.setCloseIconVisible(false);
+                                    } else {
+                                        chipResource.setCloseIconVisible(true);
+                                    }
+
+                                    return true;
+                                });
+
                                 chipResource.setOnCloseIconClickListener(view -> {
-//                                    TODO: REMOVER VALOR ESTÁ BUGANDO A LISTAGEM
-//                                    String resourceId = dataSnapshot.getKey();
-//                                    FirebaseDatabase.getInstance().getReference("resources").child(resourceId).removeValue();
+                                    String resourceId = dataSnapshot.getKey();
+                                    FirebaseDatabase.getInstance().getReference("resources").child(resourceId).removeValue();
+
+                                    Snackbar.make(view, "Recurso excluído", Snackbar.LENGTH_SHORT).show();
+
+                                    notifyDataSetChanged();
                                 });
 
                                 myViewHolder.chipGroupResources.addView(chipResource);

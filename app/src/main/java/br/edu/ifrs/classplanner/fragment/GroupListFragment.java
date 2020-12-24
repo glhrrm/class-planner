@@ -43,10 +43,10 @@ public class GroupListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        layoutProgressBar = getActivity().findViewById(R.id.layoutProgressBar);
+        layoutProgressBar = requireActivity().findViewById(R.id.layoutProgressBar);
         layoutProgressBar.setVisibility(View.VISIBLE);
 
-        RecyclerView recyclerGroups = getActivity().findViewById(R.id.recyclerGroups);
+        RecyclerView recyclerGroups = requireActivity().findViewById(R.id.recyclerGroups);
 
         getActivity().setTitle("Turmas");
 
@@ -75,6 +75,8 @@ public class GroupListFragment extends Fragment {
                         groupList.add(group);
                     }
                 });
+
+                System.out.println(groupList.toString());
 
                 layoutProgressBar.setVisibility(View.GONE);
                 recyclerGroups.setAdapter(groupAdapter);

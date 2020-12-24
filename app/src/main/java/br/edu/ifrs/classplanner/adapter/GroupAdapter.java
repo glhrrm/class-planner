@@ -81,6 +81,12 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
                                 LocalDateTime now = LocalDateTime.now();
 
+//                                TODO: MOSTRAR EM ORDEM
+//                                if (classDateTime.isAfter(now)) {
+//                                    myViewHolder.groupNextClass.setText("Próxima aula: " + aClass.getDate());
+//                                    break;
+//                                }
+
 //                                Está na hora da aula e alguma das atividades não foi realizada
                                 if (MINUTES.between(classDateTime, now) >= 0
                                         && !(aClass.isClassPlanned() && aClass.isMaterialSent() && aClass.isAttendanceTaken())) {
@@ -115,7 +121,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView groupName, groupDayAndTime;
+        TextView groupName, groupDayAndTime, groupNextClass;
         ImageView flagUpToDate;
 
         public MyViewHolder(@NonNull View itemView) {
@@ -123,6 +129,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
             groupName = itemView.findViewById(R.id.groupName);
             groupDayAndTime = itemView.findViewById(R.id.groupDayAndTime);
+            groupNextClass = itemView.findViewById(R.id.groupNextClass);
             flagUpToDate = itemView.findViewById(R.id.flagUpToDate);
         }
     }
