@@ -54,6 +54,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
         myViewHolder.groupDayAndTime.setText(capitalizedDayOfWeek + ", " + group.getTime());
 
         boolean isUpToDate = true;
+//        TODO: REVISAR
 //        for (Class aClass : group.getClasses()) {
 //            LocalDateTime classDateTime = LocalDateTime.parse(aClass.getDate() + " " + group.getTime(),
 //                    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")

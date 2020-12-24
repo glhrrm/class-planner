@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -46,16 +47,13 @@ public class NewGroupFragment extends Fragment {
 
         FloatingActionButton fabSaveGroup = view.findViewById(R.id.fabSaveGroup);
         fabSaveGroup.setOnClickListener(v -> {
-            TextInputEditText inputGroupName = view.findViewById(R.id.editTextGroupName);
+            String groupName = ((TextInputEditText) view.findViewById(R.id.editTextGroupName)).getText().toString();
             String groupTime = ((TextInputEditText) view.findViewById(R.id.editTextGroupTime)).getText().toString();
             String groupStartDate = ((TextInputEditText) view.findViewById(R.id.editTextGroupStartDate)).getText().toString();
-            TextInputEditText inputGroupClassCount = view.findViewById(R.id.editTextGroupClassCount);
+            String groupClassCount = ((TextInputEditText) view.findViewById(R.id.editTextGroupClassCount)).getText().toString();
 
-            if (inputGroupName.getText() == null
-                    || inputGroupClassCount.getText() == null
-                    || inputGroupName.getText().toString().isEmpty()
-                    || inputGroupClassCount.getText().toString().isEmpty()) {
-                Snackbar.make(view, "Preencha todos os dados", Snackbar.LENGTH_SHORT).show();
+            if (groupName.isEmpty() || groupClassCount.isEmpty()) {
+                Snackbar.make(view, R.string.fill_all_fields, Snackbar.LENGTH_SHORT).show();
                 return;
             }
 
@@ -69,10 +67,8 @@ public class NewGroupFragment extends Fragment {
                 return;
             }
 
-            String groupName = inputGroupName.getText().toString();
-            String groupClassCount = inputGroupClassCount.getText().toString();
-
-            Group group = new Group(groupName, groupTime, groupStartDate, Integer.parseInt(groupClassCount));
+            String userId = FirebaseAuth.getInstance().getUid();
+            Group group = new Group(groupName, groupTime, groupStartDate, Integer.parseInt(groupClassCount), userId);
 
             FirebaseDatabase firebase = FirebaseDatabase.getInstance();
             DatabaseReference groupReference = firebase.getReference("groups");

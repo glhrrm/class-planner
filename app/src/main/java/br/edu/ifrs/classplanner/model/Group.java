@@ -19,12 +19,14 @@ public class Group implements Serializable {
     private String time;
     private String startDate;
     private int classCount;
+    private String userId;
 
-    public Group(String name, String time, String startDate, int classCount) {
+    public Group(String name, String time, String startDate, int classCount, String userId) {
         this.name = name;
         this.time = time;
         this.startDate = startDate;
         this.classCount = classCount;
+        this.userId = userId;
     }
 
     @Exclude

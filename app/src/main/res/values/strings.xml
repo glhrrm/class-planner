@@ -13,4 +13,11 @@
     <string name="resource_name">Nome</string>
     <string name="resource_url">URL</string>
     <string name="apply_resource_globally">Aplicar a todas as aulas</string>
+    <string name="register">Criar conta</string>
+    <string name="login">Fazer login</string>
+    <string name="password">Senha</string>
+    <string name="email">Email</string>
+    <string name="fill_all_fields">Preencha todos os campos</string>
+    <string name="confirm_password">Confirme a senha</string>
+    <string name="action_sign_out">Sair</string>
 </resources>
