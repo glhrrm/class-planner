@@ -114,12 +114,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
         });
 
         myViewHolder.buttonAddResource.setOnClickListener(view -> {
-            LayoutInflater factory = LayoutInflater.from(context);
-            View dialogView = factory.inflate(R.layout.dialog_new_resource, null);
-
-            TextInputEditText inputResourceName = dialogView.findViewById(R.id.inputResourceName);
-            TextInputEditText inputResourceUrl = dialogView.findViewById(R.id.inputResourceUrl);
-            CheckBox checkBoxResource = dialogView.findViewById(R.id.checkBoxResource);
+            View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_new_resource, null);
 
             AlertDialog alertDialog = new AlertDialog.Builder(context)
                     .setTitle("Novo recurso")
@@ -129,17 +124,15 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                     .setNegativeButton(android.R.string.no, (dialog, which) -> dialog.cancel())
                     .show();
 
-            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(view1 -> {
-                if (inputResourceName.getText() == null
-                        || inputResourceUrl.getText() == null
-                        || inputResourceName.getText().toString().isEmpty()
-                        || inputResourceUrl.getText().toString().isEmpty()) {
-                    Snackbar.make(view1, "Preencha todos os dados", Snackbar.LENGTH_SHORT).show();
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String resourceName = ((TextInputEditText) dialogView.findViewById(R.id.inputResourceName)).getText().toString();
+                String resourceUrl = ((TextInputEditText) dialogView.findViewById(R.id.inputResourceUrl)).getText().toString();
+                CheckBox checkBoxResource = dialogView.findViewById(R.id.checkBoxResource);
+
+                if (resourceName.isEmpty() || resourceUrl.isEmpty()) {
+                    Snackbar.make(v, R.string.fill_all_fields, Snackbar.LENGTH_SHORT).show();
                     return;
                 }
-
-                String resourceName = inputResourceName.getText().toString();
-                String resourceUrl = inputResourceUrl.getText().toString();
 
                 if (checkBoxResource.isChecked()) {
                     DatabaseReference classesReference = FirebaseDatabase.getInstance()
@@ -184,6 +177,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
             });
         });
 
+
         FirebaseDatabase.getInstance().getReference("resources")
                 .addValueEventListener(new ValueEventListener() {
                     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -195,16 +189,24 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                             if (resource.getClassId().equals(aClass.getId())) {
                                 resources.add(resource);
 
-                                Chip resourceChip = new Chip(context);
-                                resourceChip.setText(resource.getName());
+                                Chip chipResource = (Chip) LayoutInflater.from(context)
+                                        .inflate(R.layout.chip_resource, null);
+                                chipResource.setText(resource.getName());
+                                chipResource.setCheckable(false);
 
-                                resourceChip.setOnClickListener(view -> {
+                                chipResource.setOnClickListener(view -> {
                                     ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                                     ClipData clip = ClipData.newPlainText("classInfo", resource.getUrl());
                                     clipboard.setPrimaryClip(clip);
                                 });
 
-                                myViewHolder.chipGroupResources.addView(resourceChip);
+                                chipResource.setOnCloseIconClickListener(view -> {
+//                                    TODO: REMOVER VALOR ESTÁ BUGANDO A LISTAGEM
+//                                    String resourceId = dataSnapshot.getKey();
+//                                    FirebaseDatabase.getInstance().getReference("resources").child(resourceId).removeValue();
+                                });
+
+                                myViewHolder.chipGroupResources.addView(chipResource);
                             }
                         });
 

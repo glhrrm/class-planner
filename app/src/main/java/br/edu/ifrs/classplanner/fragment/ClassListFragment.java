@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -28,6 +29,8 @@ import br.edu.ifrs.classplanner.model.Group;
 
 public class ClassListFragment extends Fragment {
 
+    private FrameLayout layoutProgressBar;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -36,6 +39,9 @@ public class ClassListFragment extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        layoutProgressBar = getActivity().findViewById(R.id.layoutProgressBar);
+        layoutProgressBar.setVisibility(View.VISIBLE);
 
         Group group = (Group) getArguments().getSerializable("group");
 
@@ -63,6 +69,7 @@ public class ClassListFragment extends Fragment {
                     }
                 });
 
+                layoutProgressBar.setVisibility(View.GONE);
                 recyclerClasses.setAdapter(classAdapter);
             }
 

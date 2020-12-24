@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +33,8 @@ import br.edu.ifrs.classplanner.model.Group;
 
 public class GroupListFragment extends Fragment {
 
+    private FrameLayout layoutProgressBar;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_group_list, container, false);
@@ -38,6 +42,9 @@ public class GroupListFragment extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        layoutProgressBar = getActivity().findViewById(R.id.layoutProgressBar);
+        layoutProgressBar.setVisibility(View.VISIBLE);
 
         RecyclerView recyclerGroups = getActivity().findViewById(R.id.recyclerGroups);
 
@@ -62,10 +69,14 @@ public class GroupListFragment extends Fragment {
 
                 snapshot.getChildren().forEach(dataSnapshot -> {
                     Group group = dataSnapshot.getValue(Group.class);
-                    group.setId(dataSnapshot.getKey());
-                    groupList.add(group);
+                    String userId = FirebaseAuth.getInstance().getUid();
+                    if (group.getUserId().equals(userId)) {
+                        group.setId(dataSnapshot.getKey());
+                        groupList.add(group);
+                    }
                 });
 
+                layoutProgressBar.setVisibility(View.GONE);
                 recyclerGroups.setAdapter(groupAdapter);
 
                 recyclerGroups.addOnItemTouchListener(
