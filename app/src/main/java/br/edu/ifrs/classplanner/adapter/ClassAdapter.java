@@ -196,18 +196,17 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                                 chipResource.setCloseIconVisible(false);
 
                                 chipResource.setOnClickListener(view -> {
-                                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                                    ClipData clip = ClipData.newPlainText("classInfo", resource.getUrl());
-                                    clipboard.setPrimaryClip(clip);
-                                });
-
-                                chipResource.setOnLongClickListener(view -> {
                                     if (chipResource.isCloseIconVisible()) {
                                         chipResource.setCloseIconVisible(false);
                                     } else {
                                         chipResource.setCloseIconVisible(true);
                                     }
+                                });
 
+                                chipResource.setOnLongClickListener(view -> {
+                                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                                    ClipData clip = ClipData.newPlainText("classInfo", resource.getUrl());
+                                    clipboard.setPrimaryClip(clip);
                                     return true;
                                 });
 
