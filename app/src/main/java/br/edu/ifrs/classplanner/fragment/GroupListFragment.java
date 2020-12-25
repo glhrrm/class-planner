@@ -19,7 +19,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -54,64 +53,61 @@ public class GroupListFragment extends Fragment {
         fabCreateGroup.setOnClickListener(v -> NavHostFragment.findNavController(GroupListFragment.this)
                 .navigate(R.id.action_GroupListFragment_to_NewGroupFragment));
 
-        FirebaseDatabase firebase = FirebaseDatabase.getInstance();
-        DatabaseReference groupReference = firebase.getReference("groups");
-        groupReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<Group> groupList = new ArrayList<>();
+        FirebaseDatabase.getInstance().getReference("groups")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Group> groupList = new ArrayList<>();
 
-                GroupAdapter groupAdapter = new GroupAdapter(groupList, getActivity());
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                recyclerGroups.setLayoutManager(layoutManager);
-                recyclerGroups.setHasFixedSize(true);
+                        GroupAdapter groupAdapter = new GroupAdapter(groupList, getActivity());
+                        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+                        recyclerGroups.setLayoutManager(layoutManager);
+                        recyclerGroups.setHasFixedSize(true);
 
-                snapshot.getChildren().forEach(dataSnapshot -> {
-                    Group group = dataSnapshot.getValue(Group.class);
-                    String userId = FirebaseAuth.getInstance().getUid();
-                    if (group.getUserId().equals(userId)) {
-                        group.setId(dataSnapshot.getKey());
-                        groupList.add(group);
+                        snapshot.getChildren().forEach(dataSnapshot -> {
+                            Group group = dataSnapshot.getValue(Group.class);
+                            String userId = FirebaseAuth.getInstance().getUid();
+                            if (group.getUserId().equals(userId)) {
+                                group.setId(dataSnapshot.getKey());
+                                groupList.add(group);
+                            }
+                        });
+
+                        layoutProgressBar.setVisibility(View.GONE);
+                        recyclerGroups.setAdapter(groupAdapter);
+
+                        recyclerGroups.addOnItemTouchListener(
+                                new RecyclerItemClickListener(
+                                        getContext(),
+                                        recyclerGroups,
+                                        new RecyclerItemClickListener.OnItemClickListener() {
+                                            @Override
+                                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                                            }
+
+                                            @Override
+                                            public void onItemClick(View view, int position) {
+                                                Bundle groupBundle = new Bundle();
+                                                groupBundle.putSerializable("group", groupList.get(position));
+                                                NavHostFragment.findNavController(GroupListFragment.this)
+                                                        .navigate(R.id.action_GroupListFragment_to_ClassListFragment, groupBundle);
+                                            }
+
+                                            @Override
+                                            public void onLongItemClick(View view, int position) {
+
+                                            }
+                                        }
+                                )
+                        );
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
                     }
                 });
-
-                System.out.println(groupList.toString());
-
-                layoutProgressBar.setVisibility(View.GONE);
-                recyclerGroups.setAdapter(groupAdapter);
-
-                recyclerGroups.addOnItemTouchListener(
-                        new RecyclerItemClickListener(
-                                getContext(),
-                                recyclerGroups,
-                                new RecyclerItemClickListener.OnItemClickListener() {
-                                    @Override
-                                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                                    }
-
-                                    @Override
-                                    public void onItemClick(View view, int position) {
-                                        Bundle groupBundle = new Bundle();
-                                        groupBundle.putSerializable("group", groupList.get(position));
-                                        NavHostFragment.findNavController(GroupListFragment.this)
-                                                .navigate(R.id.action_GroupListFragment_to_ClassListFragment, groupBundle);
-                                    }
-
-                                    @Override
-                                    public void onLongItemClick(View view, int position) {
-
-                                    }
-                                }
-                        )
-                );
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 }

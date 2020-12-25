@@ -21,6 +21,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,12 +67,17 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
         String capitalizedDayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
         myViewHolder.groupDayAndTime.setText(context.getString(R.string.group_day_of_week_and_time, capitalizedDayOfWeek, group.getTime()));
 
+//        Loop para definir data da próxima aula e status geral de atividades
         FirebaseDatabase.getInstance().getReference("classes")
                 .addValueEventListener(new ValueEventListener() {
                     @RequiresApi(api = Build.VERSION_CODES.N)
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean isUpToDate = true;
+
+                        LocalDateTime now = LocalDateTime.now();
+
+                        List<LocalDateTime> nextClassesList = new ArrayList<>();
 
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             Class aClass = dataSnapshot.getValue(Class.class);
@@ -79,26 +86,24 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
                                         DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
                                                 .withLocale(new Locale("pt", "BR")));
 
-                                LocalDateTime now = LocalDateTime.now();
-
-//                                TODO: MOSTRAR EM ORDEM
-//                                if (classDateTime.isAfter(now)) {
-//                                    myViewHolder.groupNextClass.setText("Próxima aula: " + aClass.getDate());
-//                                    break;
-//                                }
+                                if (classDateTime.isAfter(now)) {
+                                    nextClassesList.add(classDateTime);
+                                }
 
 //                                Está na hora da aula e alguma das atividades não foi realizada
                                 if (MINUTES.between(classDateTime, now) >= 0
                                         && !(aClass.isClassPlanned() && aClass.isMaterialSent() && aClass.isAttendanceTaken())) {
                                     isUpToDate = false;
-                                    break;
 //                                Faltam 2 dias ou menos para a próxima aula e ela ainda não foi planejada
                                 } else if (DAYS.between(now, classDateTime) <= 2 && !aClass.isClassPlanned()) {
                                     isUpToDate = false;
-                                    break;
                                 }
                             }
                         }
+
+                        String nextClass = Collections.min(nextClassesList)
+                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        myViewHolder.groupNextClass.setText(context.getString(R.string.group_next_class, nextClass));
 
                         if (isUpToDate) {
                             myViewHolder.flagUpToDate.setImageResource(R.drawable.ic_uptodate);
