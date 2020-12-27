@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 import br.edu.ifrs.classplanner.R;
+import br.edu.ifrs.classplanner.helper.Helper;
 import br.edu.ifrs.classplanner.model.Class;
 import br.edu.ifrs.classplanner.model.Group;
 
@@ -59,9 +60,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
         myViewHolder.groupName.setText(group.getName());
 
-        LocalDate startDate = LocalDate.parse(group.getStartDate(),
-                DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                        .withLocale(new Locale("pt", "BR")));
+        LocalDate startDate = Helper.parseDate(group.getStartDate());
         String dayOfWeek = startDate.getDayOfWeek()
                 .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
         String capitalizedDayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
@@ -82,9 +81,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             Class aClass = dataSnapshot.getValue(Class.class);
                             if (aClass.getGroupId().equals(group.getId())) {
-                                LocalDateTime classDateTime = LocalDateTime.parse(aClass.getDate() + " " + group.getTime(),
-                                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-                                                .withLocale(new Locale("pt", "BR")));
+                                LocalDateTime classDateTime = Helper.parseDateTime(aClass.getDate() + group.getTime());
 
                                 if (classDateTime.isAfter(now)) {
                                     nextClassesList.add(classDateTime);
@@ -101,9 +98,11 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
                             }
                         }
 
-                        String nextClass = Collections.min(nextClassesList)
-                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                        myViewHolder.groupNextClass.setText(context.getString(R.string.group_next_class, nextClass));
+                        if (!nextClassesList.isEmpty()) {
+                            String nextClass = Collections.min(nextClassesList)
+                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                            myViewHolder.groupNextClass.setText(context.getString(R.string.group_next_class, nextClass));
+                        }
 
                         if (isUpToDate) {
                             myViewHolder.flagUpToDate.setImageResource(R.drawable.ic_uptodate);

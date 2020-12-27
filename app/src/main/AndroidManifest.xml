@@ -26,6 +26,11 @@
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
+
+        <service
+            android:name=".service.ReminderService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest>

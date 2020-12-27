@@ -1,9 +1,11 @@
 package br.edu.ifrs.classplanner.helper;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Locale;
 
 public class Helper {
 
@@ -59,5 +61,23 @@ public class Helper {
                 "25/12/2021"
         };
         return Arrays.asList(holidays).contains(date);
+    }
+
+    public static int generateJobId(String date, String time) {
+        String allButNumbers = "\\D+";
+        String replacement = "";
+        return Integer.parseInt(date.substring(0, 5).concat(time).replaceAll(allButNumbers, replacement));
+    }
+
+    public static LocalDate parseDate(String date) {
+        return LocalDate.parse(date,
+                DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                        .withLocale(new Locale("pt", "BR")));
+    }
+
+    public static LocalDateTime parseDateTime(String dateTime) {
+        return LocalDateTime.parse(dateTime,
+                DateTimeFormatter.ofPattern("dd/MM/yyyyHH:mm")
+                        .withLocale(new Locale("pt", "BR")));
     }
 }

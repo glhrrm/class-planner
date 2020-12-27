@@ -1,5 +1,6 @@
 package br.edu.ifrs.classplanner.adapter;
 
+import android.app.job.JobScheduler;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -32,22 +33,22 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import br.edu.ifrs.classplanner.R;
+import br.edu.ifrs.classplanner.helper.Helper;
 import br.edu.ifrs.classplanner.model.Class;
 import br.edu.ifrs.classplanner.model.Group;
 import br.edu.ifrs.classplanner.model.Resource;
 
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder> {
 
-    private List<Class> classes;
-    private Group group;
-    private Context context;
+    private final List<Class> classes;
+    private final Group group;
+    private final Context context;
 
     public ClassAdapter(List<Class> classes, Group group, Context context) {
         this.classes = classes;
@@ -77,18 +78,25 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
 
         myViewHolder.classNumber.setText(String.valueOf(aClass.getNumber()));
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        dtf = dtf.withLocale(new Locale("pt", "BR"));
-        LocalDate date = LocalDate.parse(aClass.getDate(), dtf);
+        LocalDate date = Helper.parseDate(aClass.getDate());
         int day = date.getDayOfMonth();
         String month = date.getMonth().getDisplayName(TextStyle.SHORT, new Locale("pt", "BR"));
-        myViewHolder.classDate.setText(day + " " + month);
+        myViewHolder.classDate.setText(context.getString(R.string.class_day_and_month, day, month));
 
         myViewHolder.flagClassPlanned.setBackgroundResource(getFlagShape(aClass.isClassPlanned()));
         myViewHolder.flagClassPlanned.setOnClickListener(view -> {
             aClass.setClassPlanned(!aClass.isClassPlanned());
             Task<Void> result = classReference.setValue(aClass);
             showResultForFlags(result, view, myViewHolder.flagClassPlanned, aClass.isClassPlanned());
+
+            if (aClass.isClassPlanned()) {
+                int jobId = Helper.generateJobId(aClass.getDate(), group.getTime());
+
+                JobScheduler scheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+                if (scheduler.getPendingJob(jobId) != null) {
+                    scheduler.cancel(jobId);
+                }
+            }
         });
 
         myViewHolder.flagMaterialSent.setBackgroundResource(getFlagShape(aClass.isMaterialSent()));
@@ -135,42 +143,40 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                 }
 
                 if (checkBoxResource.isChecked()) {
-                    DatabaseReference classesReference = FirebaseDatabase.getInstance()
-                            .getReference("classes");
+                    FirebaseDatabase.getInstance().getReference("classes")
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @RequiresApi(api = Build.VERSION_CODES.N)
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    DatabaseReference resourcesReference = FirebaseDatabase.getInstance()
+                                            .getReference("resources");
 
-                    classesReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @RequiresApi(api = Build.VERSION_CODES.N)
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            DatabaseReference resourcesReference = FirebaseDatabase.getInstance()
-                                    .getReference("resources");
+                                    List<Task<Void>> allTasks = new ArrayList<>();
 
-                            List<Task<Void>> allTasks = new ArrayList<>();
+                                    snapshot.getChildren().forEach(dataSnapshot -> {
+                                        Class c = dataSnapshot.getValue(Class.class);
+                                        if (c.getGroupId().equals(aClass.getGroupId())) {
+                                            Resource resource = new Resource(resourceName, resourceUrl, dataSnapshot.getKey());
+                                            allTasks.add(resourcesReference.push().setValue(resource));
+                                        }
+                                    });
 
-                            snapshot.getChildren().forEach(dataSnapshot -> {
-                                Class c = dataSnapshot.getValue(Class.class);
-                                if (c.getGroupId().equals(aClass.getGroupId())) {
-                                    Resource resource = new Resource(resourceName, resourceUrl, dataSnapshot.getKey());
-                                    allTasks.add(resourcesReference.push().setValue(resource));
+                                    Task<Void> firebaseResult = Tasks.whenAll(allTasks);
+                                    Task<Void> snackbarResult = showResultForResources(firebaseResult, view);
+                                    snackbarResult.addOnSuccessListener(aVoid -> notifyDataSetChanged());
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
                                 }
                             });
-
-                            Task<Void> result = Tasks.whenAll(allTasks);
-                            showResultForResources(result, view);
-                            notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
                 } else {
                     Resource resource = new Resource(resourceName, resourceUrl, aClass.getId());
-                    Task<Void> result = FirebaseDatabase.getInstance()
+                    Task<Void> firebaseResult = FirebaseDatabase.getInstance()
                             .getReference("resources").push().setValue(resource);
-                    showResultForResources(result, view);
-                    notifyDataSetChanged();
+                    Task<Void> snackbarResult = showResultForResources(firebaseResult, view);
+                    snackbarResult.addOnSuccessListener(aVoid -> notifyDataSetChanged());
                 }
 
                 alertDialog.dismiss();
@@ -196,11 +202,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                                 chipResource.setCloseIconVisible(false);
 
                                 chipResource.setOnClickListener(view -> {
-                                    if (chipResource.isCloseIconVisible()) {
-                                        chipResource.setCloseIconVisible(false);
-                                    } else {
-                                        chipResource.setCloseIconVisible(true);
-                                    }
+                                    chipResource.setCloseIconVisible(!chipResource.isCloseIconVisible());
                                 });
 
                                 chipResource.setOnLongClickListener(view -> {
@@ -264,9 +266,9 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                 : R.drawable.roundcorner_grey;
     }
 
-    private void showResultForResources(Task<Void> result, View view) {
-        result.addOnSuccessListener(aVoid -> {
-            Snackbar.make(view, "Recurso criado", Snackbar.LENGTH_SHORT).show();
+    private Task<Void> showResultForResources(Task<Void> result, View view) {
+        return result.addOnSuccessListener(aVoid -> {
+            Snackbar.make(view, "Recurso criado com sucesso", Snackbar.LENGTH_SHORT).show();
         }).addOnFailureListener(e -> {
             Snackbar.make(view, "Erro ao criar recurso", Snackbar.LENGTH_SHORT).show();
         });

@@ -1,5 +1,9 @@
 package br.edu.ifrs.classplanner.fragment;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,21 +22,29 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import br.edu.ifrs.classplanner.R;
 import br.edu.ifrs.classplanner.helper.Helper;
 import br.edu.ifrs.classplanner.model.Class;
 import br.edu.ifrs.classplanner.model.Group;
+import br.edu.ifrs.classplanner.service.ReminderService;
 
 public class NewGroupFragment extends Fragment {
+
+    private String groupId;
+    private Group group;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -68,7 +80,7 @@ public class NewGroupFragment extends Fragment {
             }
 
             String userId = FirebaseAuth.getInstance().getUid();
-            Group group = new Group(groupName, groupTime, groupStartDate, Integer.parseInt(groupClassCount), userId);
+            group = new Group(groupName, groupTime, groupStartDate, Integer.parseInt(groupClassCount), userId);
 
             FirebaseDatabase firebase = FirebaseDatabase.getInstance();
             DatabaseReference groupReference = firebase.getReference("groups");
@@ -77,11 +89,9 @@ public class NewGroupFragment extends Fragment {
             List<Task<Void>> allTasks = new ArrayList<>();
             DatabaseReference groupPush = groupReference.push();
             allTasks.add(groupPush.setValue(group));
-            String groupId = groupPush.getKey();
+            groupId = groupPush.getKey();
 
-            LocalDate startDate = LocalDate.parse(groupStartDate,
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                            .withLocale(new Locale("pt", "BR")));
+            LocalDate startDate = Helper.parseDate(groupStartDate);
 
             int numberOfWeeks = 0;
             for (int classNumber = 0; classNumber < group.getClassCount(); classNumber++) {
@@ -94,13 +104,58 @@ public class NewGroupFragment extends Fragment {
             }
 
             Tasks.whenAll(allTasks)
-                    .addOnSuccessListener(aVoid ->
-                            Toast.makeText(getContext(), "Turma criada com sucesso", Toast.LENGTH_SHORT).show())
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Turma criada com sucesso", Toast.LENGTH_SHORT).show();
+                        sendNotification();
+                    })
                     .addOnFailureListener(e ->
                             Toast.makeText(getContext(), "Erro ao criar turma", Toast.LENGTH_SHORT).show());
 
             NavHostFragment.findNavController(NewGroupFragment.this)
                     .navigate(R.id.action_NewGroupFragment_to_GroupListFragment);
         });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void sendNotification() {
+        ComponentName serviceName = new ComponentName(getContext(), ReminderService.class);
+
+        FirebaseDatabase.getInstance().getReference("classes")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        LocalDateTime now = LocalDateTime.now();
+
+                        snapshot.getChildren().forEach(dataSnapshot -> {
+                            Class aClass = dataSnapshot.getValue(Class.class);
+
+                            String reminderTime = "08:00";
+
+                            if (aClass.getGroupId().equals(groupId)) {
+                                LocalDateTime classDateTime = Helper.parseDateTime(aClass.getDate() + reminderTime).minusDays(2);
+
+                                long difference = ChronoUnit.MILLIS.between(now, classDateTime);
+
+                                if (difference > 0) {
+                                    int jobId = Helper.generateJobId(aClass.getDate(), group.getTime());
+
+                                    JobInfo jobInfo = new JobInfo.Builder(jobId, serviceName)
+                                            .setMinimumLatency(difference)
+                                            .setRequiresCharging(false)
+                                            .build();
+
+                                    JobScheduler scheduler = (JobScheduler) getContext().getSystemService(Context.JOB_SCHEDULER_SERVICE);
+                                    scheduler.schedule(jobInfo);
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 }
