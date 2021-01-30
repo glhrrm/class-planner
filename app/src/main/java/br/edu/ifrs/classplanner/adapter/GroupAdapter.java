@@ -2,18 +2,26 @@ package br.edu.ifrs.classplanner.adapter;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.navigation.NavController;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -38,10 +46,12 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
     private List<Group> groups;
     private Context context;
+    private NavController navController;
 
-    public GroupAdapter(List<Group> groups, Context context) {
+    public GroupAdapter(List<Group> groups, Context context, NavController navController) {
         this.groups = groups;
         this.context = context;
+        this.navController = navController;
     }
 
     @NonNull
@@ -116,6 +126,49 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
                     }
                 });
+
+        myViewHolder.layoutGroupClickable.setOnClickListener(view -> {
+            Bundle groupBundle = new Bundle();
+            groupBundle.putSerializable("group", group);
+            navController.navigate(R.id.action_GroupListFragment_to_ClassListFragment, groupBundle);
+        });
+
+        myViewHolder.buttonDelete.setOnClickListener(view -> {
+            new AlertDialog.Builder(context)
+                    .setTitle("Excluir grupo")
+                    .setMessage("Tem certeza que deseja excluir esse grupo?")
+                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                        List<Task<Void>> allTasks = new ArrayList<>();
+
+                        DatabaseReference classesReference = FirebaseDatabase.getInstance().getReference("classes");
+                        classesReference.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                    Class aClass = dataSnapshot.getValue(Class.class);
+                                    if (aClass.getGroupId().equals(group.getId())) {
+                                        allTasks.add(classesReference.child(dataSnapshot.getKey()).removeValue());
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+
+                        allTasks.add(FirebaseDatabase.getInstance()
+                                .getReference("groups").child(group.getId()).removeValue());
+
+                        Tasks.whenAll(allTasks).addOnSuccessListener(aVoid -> {
+                            groups.remove(i);
+                            notifyDataSetChanged();
+                        });
+                    })
+                    .setNegativeButton(android.R.string.no, (dialog, which) -> dialog.cancel())
+                    .show();
+        });
     }
 
     @Override
@@ -127,6 +180,8 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
         TextView groupName, groupDayAndTime, groupNextClass;
         ImageView flagUpToDate;
+        ImageButton buttonDelete;
+        LinearLayout layoutGroupClickable;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -135,6 +190,8 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
             groupDayAndTime = itemView.findViewById(R.id.groupDayAndTime);
             groupNextClass = itemView.findViewById(R.id.groupNextClass);
             flagUpToDate = itemView.findViewById(R.id.flagUpToDate);
+            layoutGroupClickable = itemView.findViewById(R.id.layoutGroupClickable);
+            buttonDelete = itemView.findViewById(R.id.buttonDelete);
         }
     }
 }

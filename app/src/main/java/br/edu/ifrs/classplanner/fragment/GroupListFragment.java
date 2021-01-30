@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -27,7 +26,6 @@ import java.util.List;
 
 import br.edu.ifrs.classplanner.R;
 import br.edu.ifrs.classplanner.adapter.GroupAdapter;
-import br.edu.ifrs.classplanner.listener.RecyclerItemClickListener;
 import br.edu.ifrs.classplanner.model.Group;
 
 public class GroupListFragment extends Fragment {
@@ -60,7 +58,7 @@ public class GroupListFragment extends Fragment {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         List<Group> groupList = new ArrayList<>();
 
-                        GroupAdapter groupAdapter = new GroupAdapter(groupList, getActivity());
+                        GroupAdapter groupAdapter = new GroupAdapter(groupList, getActivity(), NavHostFragment.findNavController(GroupListFragment.this));
                         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
                         recyclerGroups.setLayoutManager(layoutManager);
                         recyclerGroups.setHasFixedSize(true);
@@ -76,32 +74,6 @@ public class GroupListFragment extends Fragment {
 
                         layoutProgressBar.setVisibility(View.GONE);
                         recyclerGroups.setAdapter(groupAdapter);
-
-                        recyclerGroups.addOnItemTouchListener(
-                                new RecyclerItemClickListener(
-                                        getContext(),
-                                        recyclerGroups,
-                                        new RecyclerItemClickListener.OnItemClickListener() {
-                                            @Override
-                                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                                            }
-
-                                            @Override
-                                            public void onItemClick(View view, int position) {
-                                                Bundle groupBundle = new Bundle();
-                                                groupBundle.putSerializable("group", groupList.get(position));
-                                                NavHostFragment.findNavController(GroupListFragment.this)
-                                                        .navigate(R.id.action_GroupListFragment_to_ClassListFragment, groupBundle);
-                                            }
-
-                                            @Override
-                                            public void onLongItemClick(View view, int position) {
-
-                                            }
-                                        }
-                                )
-                        );
                     }
 
                     @Override

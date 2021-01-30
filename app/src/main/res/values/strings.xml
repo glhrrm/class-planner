@@ -22,4 +22,5 @@
     <string name="group_day_of_week_and_time">%1$s, %2$s</string>
     <string name="group_next_class">Próxima aula: %1$s</string>
     <string name="class_day_and_month">%1$d %2$s</string>
+    <string name="delete">Excluir</string>
 </resources>
