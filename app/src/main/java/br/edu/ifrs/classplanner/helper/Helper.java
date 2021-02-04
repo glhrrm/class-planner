@@ -12,7 +12,7 @@ public class Helper {
     public static final int DATE = 1;
     public static final int TIME = 2;
 
-    public static boolean isValidDateTime(String value, int format) {
+    public static boolean isValidDateOrTime(String value, int format) {
         DateTimeFormatter formatter;
         String result;
         switch (format) {
@@ -63,11 +63,11 @@ public class Helper {
         return Arrays.asList(holidays).contains(date);
     }
 
-    public static int generateJobId(String date, String time) {
-        String allButNumbers = "\\D+";
-        String replacement = "";
-        return Integer.parseInt(date.substring(0, 5).concat(time).replaceAll(allButNumbers, replacement));
-    }
+//    public static int generateJobId(String date, String time) {
+//        LocalDateTime localDateTime = parseDateTime(date + time);
+//        long millis = ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).toInstant().toEpochMilli();
+//        return (int) (millis % Integer.MAX_VALUE);
+//    }
 
     public static LocalDate parseDate(String date) {
         return LocalDate.parse(date,

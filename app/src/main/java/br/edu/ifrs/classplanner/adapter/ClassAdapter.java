@@ -1,6 +1,5 @@
 package br.edu.ifrs.classplanner.adapter;
 
-import android.app.job.JobScheduler;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -43,6 +42,7 @@ import br.edu.ifrs.classplanner.helper.Helper;
 import br.edu.ifrs.classplanner.model.Class;
 import br.edu.ifrs.classplanner.model.Group;
 import br.edu.ifrs.classplanner.model.Resource;
+import br.edu.ifrs.classplanner.service.ReminderService;
 
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder> {
 
@@ -90,12 +90,9 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
             showResultForFlags(result, view, myViewHolder.flagClassPlanned, aClass.isClassPlanned());
 
             if (aClass.isClassPlanned()) {
-                int jobId = Helper.generateJobId(aClass.getDate(), group.getTime());
-
-                JobScheduler scheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-                if (scheduler.getPendingJob(jobId) != null) {
-                    scheduler.cancel(jobId);
-                }
+                ReminderService reminderService = new ReminderService();
+                int jobId = reminderService.generateJobId(aClass.getDate(), group.getTime());
+                reminderService.cancelJob(context, jobId);
             }
         });
 
@@ -182,7 +179,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.MyViewHolder
                 alertDialog.dismiss();
             });
         });
-
 
         FirebaseDatabase.getInstance().getReference("resources")
                 .addValueEventListener(new ValueEventListener() {

@@ -69,12 +69,12 @@ public class NewGroupFragment extends Fragment {
                 return;
             }
 
-            if (!Helper.isValidDateTime(groupStartDate, Helper.DATE)) {
+            if (!Helper.isValidDateOrTime(groupStartDate, Helper.DATE)) {
                 Snackbar.make(view, "Preencha corretamente a data", Snackbar.LENGTH_SHORT).show();
                 return;
             }
 
-            if (!Helper.isValidDateTime(groupTime, Helper.TIME)) {
+            if (!Helper.isValidDateOrTime(groupTime, Helper.TIME)) {
                 Snackbar.make(view, "Preencha corretamente o horário", Snackbar.LENGTH_SHORT).show();
                 return;
             }
@@ -130,15 +130,16 @@ public class NewGroupFragment extends Fragment {
                         snapshot.getChildren().forEach(dataSnapshot -> {
                             Class aClass = dataSnapshot.getValue(Class.class);
 
-                            String reminderTime = "08:00";
+                            String reminderTime = group.getTime();
 
                             if (aClass.getGroupId().equals(groupId)) {
-                                LocalDateTime classDateTime = Helper.parseDateTime(aClass.getDate() + reminderTime).minusDays(2);
+                                LocalDateTime reminderDateTime = Helper.parseDateTime(aClass.getDate() + reminderTime).minusDays(2);
 
-                                long difference = ChronoUnit.MILLIS.between(now, classDateTime);
+                                long difference = ChronoUnit.MILLIS.between(now, reminderDateTime);
 
                                 if (difference > 0) {
-                                    int jobId = Helper.generateJobId(aClass.getDate(), group.getTime());
+                                    ReminderService reminderService = new ReminderService();
+                                    int jobId = reminderService.generateJobId(aClass.getDate(), group.getTime());
 
                                     JobInfo jobInfo = new JobInfo.Builder(jobId, serviceName)
                                             .setMinimumLatency(difference)

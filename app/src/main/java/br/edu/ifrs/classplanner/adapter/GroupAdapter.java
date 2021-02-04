@@ -38,6 +38,7 @@ import br.edu.ifrs.classplanner.R;
 import br.edu.ifrs.classplanner.helper.Helper;
 import br.edu.ifrs.classplanner.model.Class;
 import br.edu.ifrs.classplanner.model.Group;
+import br.edu.ifrs.classplanner.service.ReminderService;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -142,12 +143,17 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.MyViewHolder
 
                         DatabaseReference classesReference = FirebaseDatabase.getInstance().getReference("classes");
                         classesReference.addValueEventListener(new ValueEventListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.N)
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                     Class aClass = dataSnapshot.getValue(Class.class);
                                     if (aClass.getGroupId().equals(group.getId())) {
                                         allTasks.add(classesReference.child(dataSnapshot.getKey()).removeValue());
+
+                                        ReminderService reminderService = new ReminderService();
+                                        int jobId = reminderService.generateJobId(aClass.getDate(), group.getTime());
+                                        reminderService.cancelJob(context, jobId);
                                     }
                                 }
                             }
