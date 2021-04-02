@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'checkstyle'
+
+task checkstyle(type: Checkstyle) {
+    configFile file("$project.rootDir/config/checkstyle/checkstyle.xml")
+    source 'src'
+    include '**/*.java'
+    classpath = files()
+}
 
 android {
     compileSdkVersion 29
