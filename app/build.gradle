@@ -10,13 +10,13 @@ task checkstyle(type: Checkstyle) {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "br.edu.ifrs.classplanner"
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         // Required when setting minSdkVersion to 20 or lower
