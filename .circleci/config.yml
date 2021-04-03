@@ -3,17 +3,6 @@ version: 2.1
 orbs:
   android: circleci/android@0.2.1
 
-# jobs:
-#   build:
-#     executor: android/android
-
-#     steps:
-#       - checkout
-#       - run:
-#           command: |
-#             sudo chmod +x ./gradlew
-#             ./gradlew build
-
 jobs:
   unit-test:
     executor:
@@ -22,7 +11,6 @@ jobs:
     steps:
       - checkout
       - android/restore-build-cache
-      - android/save-gradle-cache
       - android/save-build-cache
       - run:
           name: Save test results
