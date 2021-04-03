@@ -25,10 +25,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         createNotificationChannel();
-
-        if (true) {
-
-        }
     }
 
     @Override

@@ -5,6 +5,10 @@
 
     <module name="TreeWalker">
         <module name="EmptyBlock" />
+        <module name="ExplicitInitialization" />
+        <module name="NestedForDepth" />
+        <module name="NestedIfDepth" />
+        <module name="TodoComment" />
     </module>
 
 </module>
