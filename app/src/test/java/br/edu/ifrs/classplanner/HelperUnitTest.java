@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import br.edu.ifrs.classplanner.helper.Helper;
 
-public class HelperTest {
+public class HelperUnitTest {
 
     @Test
     public void dateMustBeValid() {
