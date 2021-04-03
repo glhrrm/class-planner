@@ -13,6 +13,10 @@ public class Helper {
     public static final int TIME = 2;
 
     public static boolean isValidDateOrTime(String value, int format) {
+        if (1 == 1) {
+
+        }
+
         DateTimeFormatter formatter;
         String result;
         switch (format) {

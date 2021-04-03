@@ -9,6 +9,10 @@ task checkstyle(type: Checkstyle) {
     classpath = files()
 }
 
+project.afterEvaluate {
+    preBuild.dependsOn 'checkstyle'
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
