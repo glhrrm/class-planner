@@ -1,13 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE module PUBLIC
     "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
     "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<!--
+    Inspeção estática com a ferramenta Checkstyle
+-->
 <module name="Checker">
 
     <module name="TreeWalker">
+        <!--
+        Verifica se há algum bloco de código sem conteúdo.
+        -->
         <module name="EmptyBlock" />
+        <!--
+        Verifica se há classes ou objetos desnecessariamente
+        inicializados com o respectivo valor padrão.
+        -->
         <module name="ExplicitInitialization" />
+        <!--
+        Verifica se há loops aninhados com profundidade maior que 1.
+        -->
         <module name="NestedForDepth" />
+        <!--
+        Verifica se há estruturas condicionais com profundidade maior que 1.
+        -->
         <module name="NestedIfDepth" />
+        <!--
+        Verifica se há comentários "TODO:".
+        -->
         <module name="TodoComment" />
     </module>
 
