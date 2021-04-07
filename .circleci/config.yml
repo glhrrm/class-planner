@@ -15,13 +15,13 @@ jobs:
       - run:
           name: Save test results
           command: |
-            mkdir -p ~/test-results/junit/
-            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+            mkdir -p ~/test-results/unit-tests/junit/
+            find . -type f -regex ".*/build/test-results/unit-tests/.*xml" -exec cp {} ~/test-results/unit-tests/junit/ \;
           when: always
       - store_test_results:
-          path: ~/test-results
+          path: ~/test-results/unit-tests
       - store_artifacts:
-          path: ~/test-results/junit
+          path: ~/test-results/unit-tests/junit
 
   android-test:
     parameters:
@@ -39,13 +39,13 @@ jobs:
       - run:
           name: Save test results
           command: |
-            mkdir -p ~/test-results/junit/
-            find . -type f -regex ".*/build/outputs/androidTest-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+            mkdir -p ~/test-results/android-tests/junit/
+            find . -type f -regex ".*/build/outputs/androidTest-results/.*xml" -exec cp {} ~/test-results/android-tests/junit/ \;
           when: always
       - store_test_results:
-          path: ~/test-results
+          path: ~/test-results/android-tests/
       - store_artifacts:
-          path: ~/test-results/junit
+          path: ~/test-results/android-tests/junit
 
   release-build:
     executor:
@@ -75,7 +75,7 @@ workflows:
             alias: android-test-all
             parameters:
               system-image:
-                - system-images;android-25;google_apis;x86
+                # - system-images;android-25;google_apis;x86
                 - system-images;android-24;google_apis;x86
           name: android-test-<<matrix.system-image>>
           filters:
