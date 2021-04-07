@@ -7,7 +7,7 @@ jobs:
   unit-test:
     executor:
       name: android/android-machine
-      resource-class: xlarge
+      resource-class: medium
     steps:
       - checkout
       - android/restore-build-cache
@@ -15,13 +15,13 @@ jobs:
       - run:
           name: Save test results
           command: |
-            mkdir -p ~/test-results/unit-tests/junit/
-            find . -type f -regex ".*/build/test-results/unit-tests/.*xml" -exec cp {} ~/test-results/unit-tests/junit/ \;
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
           when: always
       - store_test_results:
-          path: ~/test-results/unit-tests
+          path: ~/test-results
       - store_artifacts:
-          path: ~/test-results/unit-tests/junit
+          path: ~/test-results/junit
 
   android-test:
     parameters:
@@ -30,7 +30,7 @@ jobs:
         default: system-images;android-25;google_apis;x86
     executor:
       name: android/android-machine
-      resource-class: xlarge
+      resource-class: medium
     steps:
       - checkout
       - android/start-emulator-and-run-tests:
@@ -39,18 +39,18 @@ jobs:
       - run:
           name: Save test results
           command: |
-            mkdir -p ~/test-results/android-tests/junit/
-            find . -type f -regex ".*/build/outputs/androidTest-results/.*xml" -exec cp {} ~/test-results/android-tests/junit/ \;
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/build/outputs/androidTest-results/.*xml" -exec cp {} ~/test-results/junit/ \;
           when: always
       - store_test_results:
-          path: ~/test-results/android-tests/
+          path: ~/test-results
       - store_artifacts:
-          path: ~/test-results/android-tests/junit
+          path: ~/test-results/junit
 
   release-build:
     executor:
       name: android/android-machine
-      resource-class: xlarge
+      resource-class: medium
     steps:
       - checkout
       - android/restore-gradle-cache
