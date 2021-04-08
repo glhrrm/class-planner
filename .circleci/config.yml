@@ -79,8 +79,7 @@ workflows:
             alias: android-test-all
             parameters:
               system-image:
-                # - system-images;android-25;google_apis;x86
-                - system-images;android-24;google_apis;x86
+                - system-images;android-25;google_apis;x86
           name: android-test-<<matrix.system-image>>
           filters:
             branches:
