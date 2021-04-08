@@ -15,7 +15,7 @@ project.afterEvaluate {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    // buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "br.edu.ifrs.classplanner"
@@ -39,19 +39,31 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
-            // minifyEnabled false
-            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
-    signingConfigs {
-        release {
-            storeFile file("../keystore.jks")
-            storePassword "pwd"
-            keyAlias "alias"
-            keyPassword "pwd"
-        }
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+    
+    buildFeatures {
+        dataBinding = true
+    }
+
+    // Always show the result of every unit test when running via command line, even if it passes.
+    testOptions.unitTests {
+        includeAndroidResources = true
+        returnDefaultValues = true
+    }
+    
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    lintOptions{
+        abortOnError false
     }
 }
 
