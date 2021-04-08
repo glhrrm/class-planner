@@ -87,7 +87,7 @@ workflows:
       - release-build:
           requires:
             - unit-test
-            - android-test-all
+            - android-test
           filters:
             branches:
               ignore: main # Commits to main branch
