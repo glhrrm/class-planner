@@ -83,12 +83,12 @@ workflows:
           name: android-test-<<matrix.system-image>>
           filters:
             branches:
-              only: main # Commits to main branch
+              ignore: main # Commits to main branch
       - release-build:
           requires:
             - unit-test
             - android-test-all
           filters:
             branches:
-              only: main # Commits to main branch
+              ignore: main # Commits to main branch
 
