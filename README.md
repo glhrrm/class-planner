@@ -24,6 +24,6 @@ Each **class** has three flags, which indicate whether:
   * attendance has been taken (📢);
   * the material has been sent (📧).
   
-If all tasks are up-to-date, the class is identified with a check sign (✔️). Otherwise, it gets a warning sign (⚠️).
+If all tasks are up-to-date, the group is identified with a check sign (✔️). Otherwise, it gets a warning sign (⚠️).
 
 Besides, the user can add links to **resources**, like repositories and meetings.
